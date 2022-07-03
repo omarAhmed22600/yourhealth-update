@@ -87,6 +87,7 @@ dependencies:
   mb_button: any
   url_launcher: any
   flutter_launcher_icons: ^0.9.3
+  firebase_messaging: any
 
 
   

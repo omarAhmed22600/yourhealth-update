@@ -2,16 +2,18 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/screenutil_init.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:sehetak2/screens/bottom_bar.dart';
 import 'package:sehetak2/screens/components%20drawer/contact.dart';
 import 'package:sehetak2/screens/components%20drawer/setting.dart';
-import 'package:sehetak2/screens/dshbord-home/dashboard.dart';
 import 'package:sehetak2/screens/medicine-remminder/screens/home/home.dart';
 import 'package:sehetak2/screens/pediatric/pediatric-home.dart';
 import 'package:sehetak2/screens/sos/sos.dart';
 import 'package:sehetak2/widget/OnlineConsultation.dart';
 import 'package:sehetak2/widget/clinic-examination.dart';
+import 'package:sehetak2/screens/user_info.dart';
+import 'package:sehetak2/widget/dashboard.dart';
 import 'package:sehetak2/widget/home-examination.dart';
 
 import '../initial_diagnosis/initial_diagnosis_home.dart';
@@ -23,19 +25,29 @@ class Dashboard extends StatefulWidget {
   static String joinedAt;
   static String userImageUrl;
   static int phoneNumber;
-  const Dashboard({Key key}) : super(key: key);
+  static String token;
+  Dashboard();
+
   @override
   _DashboardState createState() => _DashboardState();
 }
 
 class _DashboardState extends State<Dashboard> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  int currentIndex = 1;
+  String _uid;
+  List<Widget> screens = [
+    UserInfoS(),
+    DashboardTab(),
+    SettingsPage(),
+  ];
+
 
   @override
   void initState() {
-    // TODO: implement initState
+    initializeData();
     super.initState();
-    getData();
+
   }
   @override
   void dispose() {
@@ -70,291 +82,71 @@ class _DashboardState extends State<Dashboard> {
       ),
     )??false; //if showDialouge had returned null, then return false
   }
-  void getData() async {
-    User user = _auth.currentUser;
-    Dashboard.uid = user.uid;
 
-    print('user.displayName ${user.displayName}');
-    print('user.photoURL ${user.photoURL}');
-    final DocumentSnapshot userDoc = user.isAnonymous
-        ? null
-        : await FirebaseFirestore.instance.collection('users').doc(Dashboard.uid).get();
-    if (userDoc == null) {
-      return;
-    } else {
-      setState(() {
-        Dashboard.name = userDoc.get('name');
-        Dashboard.email = user.email;
-        Dashboard.joinedAt = userDoc.get('joinedAt');
-        Dashboard.phoneNumber = userDoc.get('phoneNumber');
-        Dashboard.userImageUrl = userDoc.get('imageUrl');
-      });
-    }
-    // print("name $_name");
-  }
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: showExitPopup,
-      child: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xffb7dcea),Colors.white],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: Scaffold(
-          backgroundColor: Colors.transparent,
-          drawer: NavDrawer(),
+      child: ScreenUtilInit(
+        designSize: const Size(375, 812),
+        builder: () => Scaffold(
+          backgroundColor: HexColor("#f5fcfd"),
           appBar: AppBar(
-            brightness: Brightness.dark,
-            //remove bcakgroundcolor from appbar
-            backgroundColor: Colors.transparent,
-            //remove shadwo frome app bar
-            elevation: 5 ,
-            flexibleSpace:Container(
-              decoration: BoxDecoration(
-                borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(30),bottomRight:Radius.circular(30) ),
-                gradient: LinearGradient(
-                  colors: [HexColor("#80b1fe"),HexColor("#3D50E7")],
-                  begin: Alignment.bottomCenter,
-                  end: Alignment.topCenter,
-                ),
-              ),
+            backgroundColor: HexColor("#80B1FE"),
+            title: Center(
+              child: Text('YourHealth app'),
             ),
-            title: const Text('Home',style: TextStyle(color: Colors.white),),
           ),
-          body: Stack(
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  alignment: Alignment.topLeft,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      const Text(
-                        "Welcome To Sehetk",
-                        style: TextStyle(fontSize: 15,fontWeight: FontWeight.bold,color: Colors.black,),
-                      ),
-                      Text(
-                        Dashboard.name != null ? Dashboard.name : "User",
-                        style: const TextStyle(fontSize: 15,fontWeight: FontWeight.bold,color: Colors.black),
-                      ),
-                    ],
-                  ),
-                ),
+          body: screens[currentIndex],
+          bottomNavigationBar: new BottomNavigationBar(
+            currentIndex: currentIndex,
+            onTap: (index) {
+              setState(() {
+                currentIndex = index;
+              });
+            },
+            backgroundColor: HexColor("#f5fcfd"),
+            items: [
+              new BottomNavigationBarItem(
+                icon: new Icon(Icons.person),
+                label: 'Profile',
               ),
-
-              Container(
-                alignment: Alignment.topRight,
-                padding: const EdgeInsets.all(10.0),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: CircleAvatar(
-                    radius: 20,
-                    backgroundImage: NetworkImage(Dashboard.userImageUrl != null ? Dashboard.userImageUrl : ""),
-                  ) ,
-                ),
+              new BottomNavigationBarItem(
+                icon: new Icon(Icons.home),
+                label: 'Home',
               ),
-              const SizedBox(height: 50,),
-              SafeArea(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    const SizedBox(height: 50,),
-                    Expanded(
-                      child: GridView.count(
-                        mainAxisSpacing: 10,
-                        crossAxisCount: 2,
-                        children: <Widget>[
-                          Card(
-                            color: const Color(0xff80B1FE),
-                            margin: const EdgeInsets.all(20),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(50),
-                            ),
-                            child: InkWell(
-                              onTap: (){
-                                Navigator.of(context).push(MaterialPageRoute(builder: (context)=>BottomBarScreen()));
-                              },
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  Image.asset("assets/lottie/icons8_shopping_cart_240px_1 1.png",width: 70,height: 70,),
-                                  const Text('Online Pharmacy',style: TextStyle(fontSize: 12,color: Colors.white),),
-                                ],
-                              ),
-                            ),
-                          ),
-                          Card(
-                            color: const Color(0xff80B1FE),
-                            margin: const EdgeInsets.all(20),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(50),
-                            ),
-                            child: InkWell(
-                              onTap: (){
-                                 Navigator.of(context).push(MaterialPageRoute(builder: (context)=>OnlineConsultation(Dashboard.name,Dashboard.userImageUrl)));
-                              },
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  Image.asset("assets/lottie/chat.png",height: 60,),
-                                  const Text('Online Consultation',style: TextStyle(fontSize: 12,color: Colors.white)),
-                                ],
-                              ),
-                            ),
-                          ),
-                          Card(
-                            color: const Color(0xff80B1FE),
-                            margin: const EdgeInsets.all(20),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(50),
-                            ),
-                            child: InkWell(
-                              onTap: (){
-                                Navigator.of(context).push(MaterialPageRoute(builder: (context)=>const HomeDashboard()));
-                              },
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  Image.asset("assets/lottie/chat.png",height: 60,),
-                                  const Text('new dashboard',style: TextStyle(fontSize: 12,color: Colors.white)),
-                                ],
-                              ),
-                            ),
-                          ),
-                          Card(
-                            color: const Color(0xff80B1FE),
-                            margin: const EdgeInsets.all(20),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(50),
-                            ),
-                            child: InkWell(
-                              onTap: (){
-                                  Navigator.of(context).push(MaterialPageRoute(builder: (context)=>HomeExamination(Dashboard.name,Dashboard.userImageUrl)));
-                              },
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  Image.asset("assets/lottie/icons8_home_80px 1.png",height: 60,),
-                                  const Text('Home Examinations',style: TextStyle(fontSize: 12,color: Colors.white)),
-                                ],
-                              ),
-                            ),
-                          ),
-                          Card(
-                            color: const Color(0xff80B1FE),
-                            margin: const EdgeInsets.all(20),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(50),
-                            ),
-                            child: InkWell(
-                              onTap: (){
-                                Navigator.of(context).push(MaterialPageRoute(builder: (context)=>ClinicExamination(Dashboard.name,Dashboard.userImageUrl)));
-                              },
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  Image.asset("assets/lottie/icons8_timesheet_128px 1.png",height: 60,),
-                                  const Text('Book An Appointment',style: TextStyle(fontSize: 12,color: Colors.white)),
-                                ],
-                              ),
-                            ),
-                          ),
-                          Card(
-                            color: const Color(0xff80B1FE),
-                            margin: const EdgeInsets.all(20),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(50),
-                            ),
-                            child: InkWell(
-                              onTap: ()
-                              {
-                                Navigator.of(context).push(MaterialPageRoute(builder: (context)=>IntialDiagnisisHomeScreen()));
-                              },
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  Image.asset("assets/lottie/icons8_health_checkup_100px 1.png",height: 60,),
-                                  const Text('Intial Diagnosis',style: TextStyle(fontSize: 12,color: Colors.white)),
-                                ],
-                              ),
-                            ),
-                          ),
-                          Card(
-                            color: const Color(0xff80B1FE),
-                            margin: const EdgeInsets.all(20),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(50),
-                            ),
-                            child: InkWell(
-                              onTap: (){
-                                Navigator.of(context).push(MaterialPageRoute(builder: (context)=>const showSos()));
-                              },
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  Image.asset("assets/lottie/image 5.png",height: 60,),
-                                  const Text('SOS',style: TextStyle(fontSize: 12,color: Colors.white)),
-                                ],
-                              ),
-                            ),
-                          ),
-                          Card(
-                            color: const Color(0xff80B1FE),
-                            margin: const EdgeInsets.all(20),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(50),
-                            ),
-                            child: InkWell(
-                              onTap: (){
-                                 Navigator.of(context).push(MaterialPageRoute(builder: (context)=>const MakeDashboardItems()));
-
-                              },
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  Image.asset("assets/lottie/pharmacy.png",height: 60,),
-                                  const Text('Pediatric Dose',style: TextStyle(fontSize: 12,color: Colors.white)),
-                                ],
-                              ),
-                            ),
-                          ),
-                          Card(
-                            color: const Color(0xff80B1FE),
-                            margin: const EdgeInsets.all(20),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(50),
-                            ),
-                            child: InkWell(
-                              onTap: (){
-                                Navigator.of(context).push(MaterialPageRoute(builder: (context)=>HomeReminder()));
-
-                              },
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  Image.asset("assets/lottie/reminder.png",height: 60,),
-                                  const Text('Medicine Reminder',style: const TextStyle(fontSize: 12,color: Colors.white)),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-              )
+              new BottomNavigationBarItem(
+                icon: new Icon(Icons.settings),
+                label: 'Settings',
+              ),
             ],
           ),
         ),
-      ),
+      )
     );
   }
+
+  void initializeData() async {
+    User user=_auth.currentUser;
+    Dashboard.uid = user.uid;
+    final DocumentSnapshot userDocument = user.isAnonymous ? null
+        : await FirebaseFirestore.instance.collection("users").doc(_uid).get();
+    if(userDocument == null){
+      return;
+    }
+    else
+    {
+      setState(() {
+        Dashboard.name = userDocument.get('name');
+        Dashboard.email = user.email;
+        Dashboard.phoneNumber = userDocument.get('phoneNumber');
+        Dashboard.joinedAt = userDocument.get('joinedAt');
+        Dashboard.userImageUrl = userDocument.get('imageUrl');
+        Dashboard.token = userDocument.get("token");
+      });
+    }
+  }
+
 }
 
 

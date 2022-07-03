@@ -63,7 +63,7 @@ class _OnlineConsultationSearchState extends State<OnlineConsultationSearch> {
                 .snapshots(),
             builder:
                 // ignore: missing_return
-                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                (context, snapshot) {
               if (snapshot.hasError) {
                 return const Center(child: CircularProgressIndicator());
               }
@@ -89,6 +89,8 @@ class _OnlineConsultationSearchState extends State<OnlineConsultationSearch> {
                           description: posts['description'],
                           price: posts['price'],
                           rating: posts['rating'],
+                          doctorId: snapshot.data.docs[index].reference.id,
+                          doctorToken: snapshot.data.docs[index].data().containsKey('token')  ? posts['token'] : posts.reference.id,
                         );
                       }));
                     },

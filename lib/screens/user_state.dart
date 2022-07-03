@@ -24,7 +24,7 @@ class UserState extends StatelessWidget {
               userID = userSnapShot.data.uid;
               print(userID);
               print('the user is already active');
-              return const Dashboard();//BottomBarScreen()
+              return Dashboard();//BottomBarScreen()
             } else {
               print('the user is not  active');
               return const LandingPage();

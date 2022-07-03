@@ -11,14 +11,14 @@ import 'package:provider/provider.dart';
 import 'package:sehetak2/screens/cart.dart';
 import 'package:sehetak2/screens/wishlist.dart';
 
-class UserInfo extends StatefulWidget {
-  const UserInfo({Key key}) : super(key: key);
+class UserInfoS extends StatefulWidget {
+  const UserInfoS({Key key}) : super(key: key);
 
   @override
-  _UserInfoState createState() => _UserInfoState();
+  _UserInfoSState createState() => _UserInfoSState();
 }
 
-class _UserInfoState extends State<UserInfo> {
+class _UserInfoSState extends State<UserInfoS> {
   ScrollController _scrollController;
   var top = 0.0;
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -74,7 +74,7 @@ class _UserInfoState extends State<UserInfo> {
               slivers: <Widget>[
                 SliverAppBar(
                   // leading: Icon(Icons.ac_unit_outlined),
-                  // automaticallyImplyLeading: false,
+                  automaticallyImplyLeading: false,
                   elevation: 0,
                   expandedHeight: 200,
                   pinned: true,
@@ -198,82 +198,82 @@ class _UserInfoState extends State<UserInfo> {
                           "0"+_phoneNumber.toString() ?? '', 1, context),
                       userListTile('Shipping address', '', 2, context),
                       userListTile('joined date', _joinedAt ?? '', 3, context),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 8.0),
-                        child: userTitle(title: 'User settings'),
-                      ),
-                      const Divider(
-                        thickness: 1,
-                        color: Colors.grey,
-                      ),
-                      // ListTileSwitch(
-                      //   value: themeChange.darkTheme,
-                      //   leading: Icon(Ionicons.md_moon),
-                      //   onChanged: (value) {
-                      //     setState(() {
-                      //       themeChange.darkTheme = value;
-                      //     });
-                      //   },
-                      //   visualDensity: VisualDensity.comfortable,
-                      //   switchType: SwitchType.cupertino,
-                      //   switchActiveColor: Colors.indigo,
-                      //   title: Text('Dark theme'),
+                      // Padding(
+                      //   padding: const EdgeInsets.only(left: 8.0),
+                      //   child: userTitle(title: 'User settings'),
                       // ),
-                      Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          splashColor: Theme.of(context).splashColor,
-                          child: ListTile(
-                            onTap: () async {
-                              // Navigator.canPop(context)? Navigator.pop(context):null;
-                              showDialog(
-                                  context: context,
-                                  builder: (BuildContext ctx) {
-                                    return AlertDialog(
-                                      title: Row(
-                                        children: const [
-                                          // Padding(
-                                          //   padding: const EdgeInsets.only(
-                                          //       right: 6.0),
-                                          //   child: Image.network(
-                                          //     'https://image.flaticon.com/icons/png/128/1828/1828304.png',
-                                          //     height: 20,
-                                          //     width: 20,
-                                          //   ),
-                                          // ),
-                                          Padding(
-                                            padding: EdgeInsets.all(8.0),
-                                            child: Text('Sign out'),
-                                          ),
-                                        ],
-                                      ),
-                                      content: const Text('Do you wanna Sign out?'),
-                                      actions: [
-                                        TextButton(
-                                            onPressed: () async {
-                                              Navigator.pop(context);
-                                            },
-                                            child: const Text('Cancel')),
-                                        TextButton(
-                                            onPressed: () async {
-                                              await _auth.signOut().then(
-                                                  (value) =>
-                                                      Navigator.pop(context));
-                                            },
-                                            child: const Text(
-                                              'Ok',
-                                              style:
-                                                  TextStyle(color: Colors.red),
-                                            ))
-                                      ],
-                                    );
-                                  });
-                            },
-                            title: const Text('Logout'),
-                            leading: const Icon(Icons.exit_to_app_rounded),
-                          ),
-                        ),
-                      ),
+                      // const Divider(
+                      //   thickness: 1,
+                      //   color: Colors.grey,
+                      // ),
+                      // // ListTileSwitch(
+                      // //   value: themeChange.darkTheme,
+                      // //   leading: Icon(Ionicons.md_moon),
+                      // //   onChanged: (value) {
+                      // //     setState(() {
+                      // //       themeChange.darkTheme = value;
+                      // //     });
+                      // //   },
+                      // //   visualDensity: VisualDensity.comfortable,
+                      // //   switchType: SwitchType.cupertino,
+                      // //   switchActiveColor: Colors.indigo,
+                      // //   title: Text('Dark theme'),
+                      // // ),
+                      // Material(
+                      //   color: Colors.transparent,
+                      //   child: InkWell(
+                      //     splashColor: Theme.of(context).splashColor,
+                      //     child: ListTile(
+                      //       onTap: () async {
+                      //         // Navigator.canPop(context)? Navigator.pop(context):null;
+                      //         showDialog(
+                      //             context: context,
+                      //             builder: (BuildContext ctx) {
+                      //               return AlertDialog(
+                      //                 title: Row(
+                      //                   children: const [
+                      //                     // Padding(
+                      //                     //   padding: const EdgeInsets.only(
+                      //                     //       right: 6.0),
+                      //                     //   child: Image.network(
+                      //                     //     'https://image.flaticon.com/icons/png/128/1828/1828304.png',
+                      //                     //     height: 20,
+                      //                     //     width: 20,
+                      //                     //   ),
+                      //                     // ),
+                      //                     Padding(
+                      //                       padding: EdgeInsets.all(8.0),
+                      //                       child: Text('Sign out'),
+                      //                     ),
+                      //                   ],
+                      //                 ),
+                      //                 content: const Text('Do you wanna Sign out?'),
+                      //                 actions: [
+                      //                   TextButton(
+                      //                       onPressed: () async {
+                      //                         Navigator.pop(context);
+                      //                       },
+                      //                       child: const Text('Cancel')),
+                      //                   TextButton(
+                      //                       onPressed: () async {
+                      //                         await _auth.signOut().then(
+                      //                             (value) =>
+                      //                                 Navigator.pop(context));
+                      //                       },
+                      //                       child: const Text(
+                      //                         'Ok',
+                      //                         style:
+                      //                             TextStyle(color: Colors.red),
+                      //                       ))
+                      //                 ],
+                      //               );
+                      //             });
+                      //       },
+                      //       title: const Text('Logout'),
+                      //       leading: const Icon(Icons.exit_to_app_rounded),
+                      //     ),
+                      //   ),
+                      // ),
                     ],
                   ),
                 )

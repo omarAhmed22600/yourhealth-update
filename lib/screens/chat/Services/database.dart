@@ -21,19 +21,20 @@ class DatabaseMethods{
         .where("name", isEqualTo: username)
         .snapshots();
   }
-  Future addMessageRoom(String chatRoomId, String messageId, Map messageInfoMap ,uid,did,uname,dname,upic,dpic) async {
+  Future addMessageRoom(String chatRoomId, String messageId, Map messageInfoMap ,uid,did,uname,dname,upic,dpic,utoken,dtoken) async {
     return FirebaseFirestore.instance
         .collection("chatrooms")
         .doc(chatRoomId)
         .set({
       "userid-docid" : [uid,did],
       "username-docname" : [uname,dname],
-      "userpic-docpic" : [upic,dpic]
+      "userpic-docpic" : [upic,dpic],
+      "usertoken-doctoken" : [utoken,dtoken],
     });
   }
 
-  Future addMessage(String chatRoomId, String messageId, Map messageInfoMap,uid,did,uname,dname,upic,dpic) async {
-    await addMessageRoom(chatRoomId, messageId, messageInfoMap, uid, did,uname,dname,upic,dpic);
+  Future addMessage(String chatRoomId, String messageId, Map messageInfoMap,uid,did,uname,dname,upic,dpic,utoken,dtoken) async {
+    await addMessageRoom(chatRoomId, messageId, messageInfoMap, uid, did,uname,dname,upic,dpic,utoken,dtoken);
     return FirebaseFirestore.instance
         .collection("chatrooms")
         .doc(chatRoomId)

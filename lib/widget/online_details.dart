@@ -4,7 +4,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:sehetak2/screens/chat/VIews/ChatScreen.dart';
-import 'package:sehetak2/screens/chat/VIews/recchat.dart';
 import 'package:sehetak2/screens/dshbord-home/dashboard_home.dart';
 
 class OnlineDetailes extends StatelessWidget {
@@ -15,6 +14,7 @@ class OnlineDetailes extends StatelessWidget {
   String price;
   String doctorId;
   double rating;
+  String doctorToken;
   OnlineDetailes(
       {this.name,
       this.images,
@@ -22,7 +22,8 @@ class OnlineDetailes extends StatelessWidget {
       this.description,
       this.price,
       this.rating,
-      this.doctorId});
+      this.doctorId,
+   this.doctorToken});
 
   @override
   Widget build(BuildContext context) {
@@ -171,7 +172,7 @@ class OnlineDetailes extends StatelessWidget {
                       ),
                       child: const Icon(Icons.messenger),
                       onPressed: () {
-                        Navigator.of(context).push(MaterialPageRoute(builder: (context)=> ChatScreen(name, images, Dashboard.uid,doctorId)));
+                        Navigator.of(context).push(MaterialPageRoute(builder: (context)=> ChatScreen(name, images, Dashboard.uid,doctorId,doctorToken)));
                       },
                     ),
                   ),

@@ -3,23 +3,26 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:random_string/random_string.dart';
+import 'package:sehetak2/network/remote/dio_notification.dart';
 import 'package:sehetak2/screens/chat/Services/database.dart';
-import 'package:sehetak2/screens/chat/VIews/recchat.dart';
 import 'package:sehetak2/screens/chat/VIews/recent_chat.dart';
 import 'package:sehetak2/screens/chat/allConstants/size_constants.dart';
 import 'package:sehetak2/screens/chat/helperfunctions/shardpref_helper.dart';
+import 'package:sehetak2/screens/dshbord-home/dashboard_home.dart';
 import 'package:uuid/uuid.dart';
 
 class ChatScreen extends StatefulWidget {
-  final String name ,profileUrl,currentUid,docId ;
+  static const routeName = "/chat_screen";
+  final String name ,profileUrl,currentUid,docId,docToken ;
 
-  ChatScreen(this.name,  this.profileUrl,this.currentUid ,this.docId );
+  ChatScreen(this.name,  this.profileUrl,this.currentUid ,this.docId,this.docToken);
   @override
   _ChatScreenState createState() => _ChatScreenState();
 }
@@ -27,9 +30,9 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   String message="";
   String chatRoomId, messageId = "";
-  String profilePicUrl = "", name = "";
+  String profilePicUrl = "";
   Stream messageStream,pickStream;
-  String myName, myProfilePic, myEmail;
+  String myName, myProfilePic, myEmail,myToken;
   TextEditingController controller = TextEditingController();
   final FocusNode focusNode = FocusNode();
   PlatformFile pickedFile;
@@ -51,9 +54,10 @@ class _ChatScreenState extends State<ChatScreen> {
       return;
     } else {
       setState(() {
-        myName = userDoc.get('name');
+        myName = userDoc. get('name');
         myEmail = user.email;
         myProfilePic = userDoc.get('imageUrl');
+        myToken = userDoc.get('token');
       });
     }
     chatRoomId = getChatRoomIdByUsernames(widget.currentUid, widget.docId,);
@@ -88,7 +92,7 @@ class _ChatScreenState extends State<ChatScreen> {
       }
 
       DatabaseMethods()
-          .addMessage(chatRoomId, messageId, messageInfoMap,widget.currentUid,widget.docId,myName,widget.name,myProfilePic,widget.profileUrl)
+          .addMessage(chatRoomId, messageId, messageInfoMap,widget.currentUid,widget.docId,myName,widget.name,myProfilePic,widget.profileUrl,myToken,widget.docToken)
           .then((value) {
         Map<String, dynamic> lastMessageInfoMap = {
           "lastMessage": message,
@@ -97,7 +101,26 @@ class _ChatScreenState extends State<ChatScreen> {
         };
 
         DatabaseMethods().updateLastMessageSend(chatRoomId, lastMessageInfoMap);
-
+        DioNotificationHelper.postData(
+             data: {
+               'notification': <String, dynamic>{
+                 'body': message,
+                 'title': widget.name
+               },
+               'priority': 'high',
+               'data': <String, dynamic>{
+                 'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+                 'id': '1',
+                 'status': 'done',
+                 'name' : myName,
+                 'profileUrl' : Dashboard.userImageUrl,
+                 'currentUid' : widget.docId,
+                 'docId' : widget.currentUid,
+                 'docToken' : myToken
+               },
+               'to': widget.docToken,
+             },
+        );
         if (sendClicked) {
           // remove the text in the message input field
           message = "";
@@ -183,10 +206,13 @@ class _ChatScreenState extends State<ChatScreen> {
     await getData();
     getAndSetMessages();
   }
-
+var fbm = FirebaseMessaging.instance;
   @override
   void initState() {
     controller.text ="";
+    fbm.getToken().then((value) {
+      print("token = "+value);
+    });
     doThisOnLaunch();
     super.initState();
   }
@@ -220,7 +246,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 IconButton(
                   icon:  Icon(Icons.arrow_back_ios, color: Colors.black,),
                   onPressed: () => Navigator.push(context, MaterialPageRoute(
-                    builder:(context)=>recchat(),
+                    builder:(context)=>RecentChats(),
                   ),
                   ),
                 ),

@@ -1,5 +1,6 @@
 // ignore_for_file: file_names, unnecessary_new, sized_box_for_whitespace, void_checks
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -29,6 +30,9 @@ class _OnlineConsultationState extends State<OnlineConsultation>
   bool isExcecuted = false;
   String docId = "";
 
+
+
+
   // ignore: unused_field
   @override
   void initState() {
@@ -37,6 +41,12 @@ class _OnlineConsultationState extends State<OnlineConsultation>
       vsync: this,
       initialIndex: 0,
     );
+    FirebaseMessaging.onMessage.listen((event) {
+    });
+    FirebaseMessaging.onMessageOpenedApp.listen((event) {
+      print("=============================runed====================================================");
+      Navigator.of(context).pushNamed("/recent_chat");
+    });
     super.initState();
   }
 
@@ -240,6 +250,8 @@ class _OnlineConsultationState extends State<OnlineConsultation>
                                                         'price'],
                                                         rating: posts[
                                                         'rating'],
+                                                          doctorId: snapshot.data.docs[i].reference.id,
+                                                        doctorToken: snapshot.data.docs[i].data().containsKey('token')  ? posts['token'] : posts.reference.id,
                                                       );
                                                     }));
                                           },
@@ -410,6 +422,8 @@ class _OnlineConsultationState extends State<OnlineConsultation>
                                                         'price'],
                                                         rating: posts[
                                                         'rating'],
+                                                          doctorId: snapshot.data.docs[i].reference.id,
+                                                        doctorToken: snapshot.data.docs[i].data().containsKey('token')  ? posts['token'] : posts.reference.id,
                                                       );
                                                     }));
                                           },
@@ -580,6 +594,8 @@ class _OnlineConsultationState extends State<OnlineConsultation>
                                                         'price'],
                                                         rating: posts[
                                                         'rating'],
+                                                          doctorId: snapshot.data.docs[i].reference.id,
+                                                        doctorToken: snapshot.data.docs[i].data().containsKey('token')  ? posts['token'] : posts.reference.id,
                                                       );
                                                     }));
                                           },
@@ -750,6 +766,8 @@ class _OnlineConsultationState extends State<OnlineConsultation>
                                                         'price'],
                                                         rating: posts[
                                                         'rating'],
+                                                          doctorId: snapshot.data.docs[i].reference.id,
+                                                        doctorToken: snapshot.data.docs[i].data().containsKey('token')  ? posts['token'] : posts.reference.id,
                                                       );
                                                     }));
                                           },
@@ -920,6 +938,8 @@ class _OnlineConsultationState extends State<OnlineConsultation>
                                                         'price'],
                                                         rating: posts[
                                                         'rating'],
+                                                          doctorId: snapshot.data.docs[i].reference.id,
+                                                        doctorToken: snapshot.data.docs[i].data().containsKey('token')  ? posts['token'] : posts.reference.id,
                                                       );
                                                     }));
                                           },
@@ -1091,6 +1111,8 @@ class _OnlineConsultationState extends State<OnlineConsultation>
                                                         'price'],
                                                         rating: posts[
                                                         'rating'],
+                                                          doctorId: snapshot.data.docs[i].reference.id,
+                                                        doctorToken: snapshot.data.docs[i].data().containsKey('token')  ? posts['token'] : posts.reference.id,
                                                       );
                                                     }));
                                           },

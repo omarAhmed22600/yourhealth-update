@@ -79,7 +79,12 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
         headerHeight: MediaQuery.of(context).size.height * 0.25,
         appBar: BackdropAppBar(
           title: Text("Home"),
-          leading: BackdropToggleButton(icon: AnimatedIcons.home_menu),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back_rounded,color: Colors.white,),
+            onPressed: (){
+              Navigator.pop(context);
+            },
+          ),
           flexibleSpace: Container(
             decoration: BoxDecoration(
                 gradient: LinearGradient(colors: [
@@ -101,7 +106,8 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
                 ),
               ),
               onPressed: () {},
-            )
+            ),
+            BackdropToggleButton(icon: AnimatedIcons.home_menu),
           ],
         ),
         backLayer: BackLayerMenu(),

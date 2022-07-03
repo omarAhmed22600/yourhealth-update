@@ -7,13 +7,15 @@ class Chat
   String lastMessage= "";
   String lastMessageTime= "";
   String doctorId = "";
-  Chat(lastMessage,lastMessageTime,otherPartyPic,otherPartyName,doctorId)
+  String otherPartyToken = "";
+  Chat(lastMessage,lastMessageTime,otherPartyPic,otherPartyName,doctorId,otherPartyToken)
   {
     this.lastMessage = lastMessage;
     this.lastMessageTime = lastMessageTime;
     this.otherPartyPic = otherPartyPic;
     this.otherPartyName = otherPartyName;
     this.doctorId = doctorId;
+    this.otherPartyToken = otherPartyToken;
   }
 
 }

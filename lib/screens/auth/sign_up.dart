@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:conditional_builder/conditional_builder.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/services.dart';
 import 'package:sehetak2/consts/colors.dart';
@@ -53,8 +54,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   double _price;
   String _describtion;
-
+  String _token;
+  var fbm = FirebaseMessaging.instance;
   String _title;
+  @override
+  void initState() {
+    fbm.getToken().then((value) {
+      print("token = "+value);
+      _token = value;
+    });
+    super.initState();
+  }
   @override
   void dispose() {
     _passwordFocusNode.dispose();
@@ -109,6 +119,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             'joinedAt': formattedDate,
             'createdAt': Timestamp.now(),
             'doctor': _isDoctor.toString(),
+            'token' : _token
           }).then((value) async {
             await FirebaseFirestore.instance
                 .collection('doctors')
@@ -122,6 +133,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               'specialty': speciality,
               'sr': sr,
               'title': _title,
+              'token' : _token
             });
           });
           Navigator.canPop(context) ? Navigator.pop(context) : null;

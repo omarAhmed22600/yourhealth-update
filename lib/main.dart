@@ -1,8 +1,13 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:sehetak2/components/applocal.dart';
 import 'package:sehetak2/consts/theme_data.dart';
 import 'package:sehetak2/inner_screens/product_details.dart';
+import 'package:sehetak2/network/remote/dio_notification.dart';
+import 'package:sehetak2/screens/chat/VIews/ChatScreen.dart';
+import 'package:sehetak2/screens/chat/VIews/recent_chat.dart';
 import 'package:sehetak2/screens/medicine-remminder/screens/home/home.dart';
 import 'package:sehetak2/screens/splash-Screen/splash-s.dart';
 import 'package:sehetak2/screens/upload_product_form.dart';
@@ -29,10 +34,37 @@ import 'screens/landing_page.dart';
 import 'screens/medicine-remminder/screens/add_new_medicine/add_new_medicine.dart';
 
 SharedPreferences mySharedPreferences;
+const AndroidNotificationChannel channel = AndroidNotificationChannel(
+    'high_importance_channel', // id
+    'High Importance Notifications', // title
+    'This channel is used for important notifications.', // description
+    importance: Importance.high,
+    playSound: true);
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  print('A bg message just showed up :  ${message.messageId}');
+}
 
-void main() {
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+FlutterLocalNotificationsPlugin();
+
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+
+  await flutterLocalNotificationsPlugin
+      .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+      ?.createNotificationChannel(channel);
+
+  await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
   DioHelper.init();
+  DioNotificationHelper.init();
   DioTokenGetter.init();
   DioTokenGetter.getToken();
   CacheHelper.init();
@@ -45,16 +77,47 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  bool fromNotification =false;
   DarkThemeProvider themeChangeProvider = DarkThemeProvider();
+  final GlobalKey<NavigatorState> navigatorKey = GlobalKey(debugLabel: "Main Navigator");
+  String notName,notUrl,notUid,notDid,notToken;
 
   void getCurrentAppTheme() async {
     themeChangeProvider.darkTheme =
         await themeChangeProvider.darkThemePreferences.getTheme();
   }
 
+  initalMessage() async{
+    var event = await FirebaseMessaging.instance.getInitialMessage();
+    if(event != null)
+    {
+      Navigator.of(context).pushNamed("/recent_chat");
+    }
+  }
   @override
   void initState() {
+    initalMessage();
     getCurrentAppTheme();
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      RemoteNotification notification = message.notification;
+      AndroidNotification android = message.notification?.android;
+      if (notification != null && android != null) {
+        flutterLocalNotificationsPlugin.show(
+            notification.hashCode,
+            notification.title,
+            notification.body,
+            NotificationDetails(
+              android: AndroidNotificationDetails(
+                channel.id,
+                channel.name,
+                channel.description,
+                color: Colors.blue,
+                playSound: true,
+                icon: '@mipmap/ic_launcher',
+              ),
+            ));
+      }
+    });
     super.initState();
   }
 
@@ -64,6 +127,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return FutureBuilder<Object>(
         future: _initialization,
+
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const MaterialApp(
@@ -100,6 +164,7 @@ class _MyAppState extends State<MyApp> {
               child: Consumer<DarkThemeProvider>(
                   builder: (context, themeData, child) {
                 return MaterialApp(
+                  navigatorKey: navigatorKey,
                   debugShowCheckedModeBanner: false,
                   title: 'Flutter Demo',
                   theme:
@@ -109,6 +174,7 @@ class _MyAppState extends State<MyApp> {
                   routes: {
                     "/home": (context) => HomeReminder(),
                     "/add_new_medicine": (context) => AddNewMedicine(),
+                    "/recent_chat" : (context) => RecentChats(),
                     //   '/': (ctx) => LandingPage(),
                     BrandNavigationRailScreen.routeName: (ctx) =>
                         BrandNavigationRailScreen(),

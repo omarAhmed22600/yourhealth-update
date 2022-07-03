@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:conditional_builder/conditional_builder.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -14,6 +15,7 @@ import 'package:sehetak2/screens/dshbord-home/dashboard_home.dart';
 import '../../../consts/colors.dart';
 
 class RecentChats extends StatefulWidget {
+  static const routeName = "/recent_chat";
   const RecentChats({Key key}) : super(key: key);
 
   @override
@@ -26,12 +28,17 @@ class _RecentChatsState extends State<RecentChats> {
   bool isDataLoaded = false;
   @override
   void initState() {
-    // TODO: implement initState
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await getChats();
-      setState(() {});
+     await getChats();
+     isDataLoaded = true;
     });
+    setState(() {});
+
     super.initState();
+  }
+  @override
+  void dispose() {
+    super.dispose();
   }
   @override
   Widget build(BuildContext context) {
@@ -61,7 +68,7 @@ class _RecentChatsState extends State<RecentChats> {
         ),
       ),
       body: ConditionalBuilder(
-        condition: isDataLoaded,
+        condition: chats.isNotEmpty && isDataLoaded,
           builder: (build) => SingleChildScrollView(
             scrollDirection: Axis.vertical,
             child: Padding(
@@ -95,16 +102,18 @@ class _RecentChatsState extends State<RecentChats> {
           event.docs.forEach((element) {
             int indexOfOtherParty = 0;
             String otherPartyId=element.data()['userid-docid'][indexOfOtherParty];
+            String otherPartyToken = element.data()['usertoken-doctoken'][indexOfOtherParty];
             if(otherPartyId == Dashboard.uid)
               {
                 indexOfOtherParty = 1;
                 otherPartyId=element.data()['userid-docid'][indexOfOtherParty];
+
               }
+            otherPartyToken = element.data()['usertoken-doctoken'][indexOfOtherParty];
             String otherPartyName = element.data()['username-docname'][indexOfOtherParty];
             String otherPartyPic = element.data()["userpic-docpic"][indexOfOtherParty];
             DateTime h = (element.data()['lastMessageSendTs'] as Timestamp).toDate();
             String hours = new DateFormat.jm().format(h);
-
             if (h.day != DateTime.now().day)
               {
                 if  ((h.day == DateTime.now().day-1 && h.month==DateTime.now().month && h.year == DateTime.now().year) ||( DateTime.now().day == 1 && h.month == DateTime.now().month-1 && h.year == DateTime.now().year) )
@@ -117,15 +126,10 @@ class _RecentChatsState extends State<RecentChats> {
                   }
               }
 
-            chats.add( new Chat(element.data()['lastMessage'],hours,otherPartyPic,otherPartyName,element.data()['userid-docid'][1]));
+            chats.add( new Chat(element.data()['lastMessage'],hours,otherPartyPic,otherPartyName,element.data()['userid-docid'][1],otherPartyToken));
           });
-
-    }).onDone(() {
-      setState(() { });
-      isDataLoaded = true;
+          setState(() {});
     });
-    isDataLoaded = true;
-    setState(() { });
   }
 
   Widget chatBuilder(index)
@@ -139,7 +143,7 @@ class _RecentChatsState extends State<RecentChats> {
         Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => ChatScreen(chats[index].otherPartyName,chats[index].otherPartyPic,Dashboard.uid,chats[index].doctorId)));
+                builder: (context) => ChatScreen(chats[index].otherPartyName,chats[index].otherPartyPic,Dashboard.uid,chats[index].doctorId,chats[index].otherPartyToken)));
 
         },
       child: Container(
@@ -257,8 +261,8 @@ class MySearchDelegate extends SearchDelegate
         Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => ChatScreen(chats[index].otherPartyName,chats[index].otherPartyPic,Dashboard.uid,chats[index].doctorId)));
-        Navigator.pop(context);
+                builder: (context) => ChatScreen(chats[index].otherPartyName,chats[index].otherPartyPic,Dashboard.uid,chats[index].doctorId,chats[index].otherPartyToken)));
+
       },
       child: Container(
         decoration: BoxDecoration(
